@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "989070411476",
+    "firebase_url": "https://twigger-93153.firebaseio.com",
+    "project_id": "twigger-93153",
+    "storage_bucket": "twigger-93153.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989070411476:android:ef50d196b519da98ac9d41",
+        "android_client_info": {
+          "package_name": "com.example.auto_food"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "989070411476-jisuee555mqdnu3fo0q5q93jjpqnqttg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.auto_food",
+            "certificate_hash": "421ba923262e539c94e834a5c5f74ded507639d6"
+          }
+        },
+        {
+          "client_id": "989070411476-sl5lt6449gdphba6s2uva25ggj2hs5hg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDIVecRiNO8HjHliztLy4rxOnJO8SzK8k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "989070411476-sl5lt6449gdphba6s2uva25ggj2hs5hg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "989070411476-me4kmierjeqmktfif5toaiksa856mdhn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.autofood"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
