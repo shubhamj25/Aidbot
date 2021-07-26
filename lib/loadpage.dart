@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:auto_food/sendFile.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -469,65 +470,98 @@ class _HomepageState extends State<Homepage> {
                                               print(formData['email']);
                                               print(orderData);
 
-                                              databaseReference.child("counter").once().then((snapshot){
-                                                id=snapshot.value.toString();
-                                              }).then((value){
-                                                Firestore.instance.collection(s).document("$id").setData({
-                                                  'orderid':  '$id',
-                                                  'dishes':dishes,
-                                                  'grandtotal':grandtotal,
-                                                  'status':"Preparing...",
-                                                  'pin':"Order yet to dispatch",
-                                                  'timestamp':Timestamp.now(),
-                                                  'deliveryaddress':_selectedDestination,
-                                                  'deliverto':orderData['name'],
-                                                  'customer_phone':orderData['phone'],
-                                                  'customer_email':orderData['email']
-                                                });
+                                              databaseReference.child("busy").once().then((snapshot){
+                                                bool isBusy=snapshot.value;
+                                                if(!isBusy){
+                                                  databaseReference.child("counter").once().then((snapshot){
+                                                    id=snapshot.value.toString();
+                                                  }).then((value){
+                                                    Firestore.instance.collection(s).document("$id").setData({
+                                                      'orderid':  '$id',
+                                                      'dishes':dishes,
+                                                      'grandtotal':grandtotal,
+                                                      'status':"Preparing...",
+                                                      'pin':"Order yet to dispatch",
+                                                      'timestamp':Timestamp.now(),
+                                                      'deliveryaddress':_selectedDestination,
+                                                      'deliverto':orderData['name'],
+                                                      'customer_phone':orderData['phone'],
+                                                      'customer_email':orderData['email']
+                                                    });
 
-                                                Firestore.instance.collection('Allorders').document("$id").setData({
-                                                  'orderid':  '$id',
-                                                  'dishes':dishes,
-                                                  'grandtotal':grandtotal,
-                                                  'status':"Preparing...",
-                                                  'pin':"Order yet to dispatch",
-                                                  'timestamp':Timestamp.now(),
-                                                  'deliveryaddress':_selectedDestination,
-                                                  'deliverto':orderData['name'],
-                                                  'customer_phone':orderData['phone'],
-                                                  'customer_email':orderData['email']
-                                                });
-                                                String directions;
-                                                Firestore.instance.collection("directions").document("$_selectedDestination").get().then((doc) => {
-                                                  if(doc.exists){
-                                                    directions=doc.data['address']
-                                                  }
-                                                }).then((value) => {
-                                                  databaseReference.child('Allorders').child("$id").set({
-                                                    'orderid':  '$id',
-                                                    'dishes':dishes,
-                                                    'grandtotal':grandtotal,
-                                                    'status':"Preparing...",
-                                                    'pin':"Order yet to dispatch",
-                                                    'timestamp':Timestamp.now().toString(),
-                                                    'deliveryaddress':directions,
-                                                    'deliverto':orderData['name'].toString(),
-                                                    'customer_phone':orderData['phone'].toString(),
-                                                    'customer_email':orderData['email'].toString()
-                                                  })
-                                                });
-                                                widget.orderid="Order Placed Successfully with id:\n$id";
-                                                orderids.add("$id");
-                                                databaseReference.update({'counter': int.parse(id)+1});
+                                                    Firestore.instance.collection('Allorders').document("$id").setData({
+                                                      'orderid':  '$id',
+                                                      'dishes':dishes,
+                                                      'grandtotal':grandtotal,
+                                                      'status':"Preparing...",
+                                                      'pin':"Order yet to dispatch",
+                                                      'timestamp':Timestamp.now(),
+                                                      'deliveryaddress':_selectedDestination,
+                                                      'deliverto':orderData['name'],
+                                                      'customer_phone':orderData['phone'],
+                                                      'customer_email':orderData['email']
+                                                    });
+                                                    String directions;
+                                                    Firestore.instance.collection("directions").document("$_selectedDestination").get().then((doc) => {
+                                                      if(doc.exists){
+                                                        directions=doc.data['address']
+                                                      }
+                                                    }).then((value) => {
+                                                      databaseReference.child('Allorders').child("$id").set({
+                                                        'orderid':  '$id',
+                                                        'dishes':dishes,
+                                                        'grandtotal':grandtotal,
+                                                        'status':"Preparing...",
+                                                        'pin':"Order yet to dispatch",
+                                                        'timestamp':Timestamp.now().toString(),
+                                                        'deliveryaddress':directions,
+                                                        'deliverto':orderData['name'].toString(),
+                                                        'customer_phone':orderData['phone'].toString(),
+                                                        'customer_email':orderData['email'].toString()
+                                                      })
+                                                    });
+                                                    widget.orderid="Order Placed Successfully with id:\n$id";
+                                                    orderids.add("$id");
+                                                    databaseReference.update({'counter': int.parse(id)+1});
+                                                  });
+
+                                                  Timer(Duration(seconds: 3), () {
+                                                    Firestore.instance.collection('cartItems${formData['email']}').getDocuments().then((snapshot) {
+                                                      for (DocumentSnapshot ds in snapshot.documents){
+                                                        ds.reference.delete();
+                                                      }}).then((value){
+                                                      Flushbar(
+                                                        shouldIconPulse: true,
+                                                        isDismissible: true,
+                                                        flushbarPosition: FlushbarPosition.TOP,
+                                                        titleText: Text("Placed Successfully",style: GoogleFonts.happyMonkey(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 17.0),),
+                                                        messageText: Text("Kindly check in your All Orders tab...",style: GoogleFonts.happyMonkey(color: Colors.white,fontSize: 15.0)),
+                                                        duration: Duration(seconds: 2),
+                                                        icon: Icon(Icons.check_circle,color: Colors.white,),
+                                                        backgroundColor:  Colors.green,
+                                                      )..show(context);
+                                                    });
+                                                    placingorder=false;
+                                                    widget.orderid="";
+                                                  });
+                                                }
+                                                else{
+                                                  Flushbar(
+                                                    shouldIconPulse: true,
+                                                    isDismissible: true,
+                                                    flushbarPosition: FlushbarPosition.TOP,
+                                                    titleText: Text("Busy",style: GoogleFonts.happyMonkey(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 17.0),),
+                                                    messageText: Text("AIDbot is busy processing another order kindly wait for sometime.",style: GoogleFonts.happyMonkey(color: Colors.white,fontSize: 15.0)),
+                                                    duration: Duration(seconds: 2),
+                                                    icon: Icon(Icons.close,color: Colors.white,),
+                                                    backgroundColor:  Colors.redAccent,
+                                                  )..show(context).then((value){
+                                                    setState(() {
+                                                      placingorder=false;
+                                                    });
+                                                  });
+                                                }
                                               });
-                                            });
-                                            Timer(Duration(seconds: 3), () {
-                                              Firestore.instance.collection('cartItems${formData['email']}').getDocuments().then((snapshot) {
-                                                for (DocumentSnapshot ds in snapshot.documents){
-                                                  ds.reference.delete();
-                                                }});
-                                              placingorder=false;
-                                              widget.orderid="";
                                             });
                                           }
                                           else{
@@ -535,6 +569,9 @@ class _HomepageState extends State<Homepage> {
                                               destinationNotSelected=true;
                                             });
                                           }
+
+
+
                                         },
                                       ),
                                     ),
@@ -1984,7 +2021,10 @@ class _OrdercardState extends State<Ordercard> {
               ),
             ),
           ),
-          if (widget.orderCardDetails.status!="Delivered" && widget.orderCardDetails.status!="Canceled")Row(
+          //Cancel Order Functionality
+          /*
+          if (widget.orderCardDetails.status!="Delivered" && widget.orderCardDetails.status!="Canceled")
+            Row(
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -2014,6 +2054,8 @@ class _OrdercardState extends State<Ordercard> {
               )
             ],
           )
+
+          */
         ],
         subtitle: Text("Grand Total: Rs ${widget.orderCardDetails.grandT}",style: GoogleFonts.happyMonkey(fontSize:MediaQuery.of(context).size.width*0.04,fontWeight:FontWeight.w800),),
       ),

@@ -39,7 +39,8 @@ dependencies:
   groovin_widgets:
   firebase_database:
   pin_input_text_field: ^3.0.1
-
+  flushbar:
+  splashscreen: ^1.3.5
 
 dev_dependencies:
   flutter_test:
